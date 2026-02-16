@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Understanding a Single Neuron</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']]
+            }
+        };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.8;
+            color: #1a1a1a;
+            background: #fafafa;
+        }
+        .back {
+            display: inline-block;
+            margin-bottom: 40px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .back:hover { color: #1a1a1a; }
+        .post-header {
+            margin-bottom: 48px;
+        }
+        .post-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            color: #111;
+        }
+        .post-date {
+            color: #888;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+        .post-tags {
+            margin-top: 12px;
+        }
+        .tag {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #555;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 6px;
+        }
+        .post-content h2 {
+            font-size: 24px;
+            margin-top: 48px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .post-content h3 {
+            font-size: 20px;
+            margin-top: 36px;
+            margin-bottom: 12px;
+        }
+        .post-content h4 {
+            font-size: 17px;
+            margin-top: 28px;
+            margin-bottom: 10px;
+        }
+        .post-content h5 {
+            font-size: 15px;
+            margin-top: 24px;
+            margin-bottom: 8px;
+        }
+        .post-content p {
+            margin-bottom: 16px;
+        }
+        .post-content code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 90%;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        .post-content pre {
+            background: #1a1a1a;
+            color: #e6e6e6;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .post-content pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        .post-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .post-content th, .post-content td {
+            border: 1px solid #e1e4e8;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .post-content th {
+            background: #f6f8fa;
+            font-weight: 600;
+        }
+        .post-content strong { color: #111; }
+        .post-content blockquote {
+            border-left: 3px solid #ddd;
+            padding: 0 16px;
+            color: #666;
+            margin: 20px 0;
+        }
+        .post-content ul, .post-content ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        .post-content li {
+            margin-bottom: 6px;
+        }
+        .math-block {
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back">← back</a>
+    <div class="post-header">
+        <h1>Understanding a Single Neuron</h1>
+        <div class="post-date">February 16, 2025</div>
+        <div class="post-tags">
+            <span class="tag">neural networks</span><span class="tag">numpy</span><span class="tag">from scratch</span>
+        </div>
+    </div>
+    <div class="post-content">
+        <h1>A Single Neuron: The Building Block of Neural Networks</h1>
+
+<p>Let's consider a singular Neuron that has weight(<span class="math-inline">$w$</span>), bias(<span class="math-inline">$b$</span>) and input(<span class="math-inline">$x$</span>):</p>
+
+<div class="math-block">$$w = 0.5$$</div>
+
+<div class="math-block">$$b = 0.1$$</div>
+
+<div class="math-block">$$x = 2.0$$</div>
+
+<p>Neuron's output (aka forward pass) is calculated by:</p>
+
+<div class="math-block">$$\hat{y} = wx + b $$</div>
+
+<div class="math-block">$$\hat{y} = (0.5) \cdot (2.0) + (0.1)$$</div>
+
+<div class="math-block">$$\hat{y} = 1.0 + 0.1 $$</div>
+
+<div class="math-block">$$\hat{y} = 1.1 $$</div>
+
+<p>Neuron's output (<span class="math-inline">$\hat{y}$</span>) is considered to be the predicted value.</p>
+
+<p>Lets say the correct value (<span class="math-inline">$y$</span>) is <span class="math-inline">$1.5$</span>, then how should the loss be calculated?</p>
+
+<h3>What is a loss function?</h3>
+
+<p>A loss function measures how far the network's prediction are from the correct answers. A lower loss means better predictions.</p>
+
+<p>As an example, you could say why not just subtract correct values from predictions in order to calculate the loss.</p>
+
+<p><span class="math-inline">$(predicted - correct)$</span> doesn't work because, for values of correct that are higher than predicitions, the answer will be negative. We don't care about the negative sign. Positive or negative, we just want to know how bad is our network performing.</p>
+
+<p>Therefore, we need a loss function that gets rid of the negative sign. Let's look at Mean-Squared Error loss function. MSE with multiple values, it's the <em>mean</em> of all squared errors.</p>
+
+<div class="math-block">$$L = \frac{1}{n}\sum_{i=1}^{n}(\hat{y}_i - y_i)^{2}$$</div>
+
+<p>Let's compute the loss for our example now:</p>
+
+<div class="math-block">$$L = (1.1 - 1.5)^{2} = (-0.4)^{2} = 0.16$$</div>
+
+<h3>We got a loss (looks bad!). Now what?</h3>
+
+<p>Simply taking a look at the information we have with this one neuron, we can see that there are some levers that we can turn. There's <span class="math-inline">$weights$</span> and <span class="math-inline">$bias$</span> that seems tweakable. We shouldn't be tweaking the input features (<span class="math-inline">$x$</span>) because they are constants.</p>
+
+<p>Though the question now becomes, in what direction should these weights and bias change towards, and more importantly, by how much?</p>
+
+<p>We need some way to measure each lever's influence on the loss. If we nudge a weight by a tiny amount, how much does the loss change? In mathematics, this is exactly what a <strong>derivative</strong> gives us.</p>
+
+<h3>What is a derivative?</h3>
+
+<p>A derivative, by formal definition represents the instantaneous rate of change of a function with respect to one of its variables, defined as the slope of the tangent line to the function's graph at a specific point.</p>
+
+<p>In our example, we are interested in seeing how does our <em>loss</em> change if we <strong>nudge</strong> our prediction by a tiny amount. It can be represented as:</p>
+
+<div class="math-block">$$\frac{dL}{d\hat{y}} = \frac{d}{d\hat{y}}(\hat{y} - y)^{2} = 2(\hat{y} - y)$$</div>
+
+<div class="math-block">$$\frac{dL}{d\hat{y}} = 2(1.1 - 1.5) = 2(-0.4) = -0.8$$</div>
+
+<p>Here, <span class="math-inline">$-0.8$</span> means that, if we increase the prediction by a tiny amount, the loss decreases. That tells us the prediction should go <strong>up</strong> to get closer to 1.5.</p>
+
+<p>OK, but we can't directly change the prediction. The prediction comes from <span class="math-inline">$wx + b$</span>. So how do we figure out which lever to adjust, <span class="math-inline">$w$</span> or <span class="math-inline">$b$</span>?</p>
+
+<p>As you might have predicted, this is where the chain rule comes in.</p>
+
+<h3>Why do we need the chain rule?</h3>
+
+<p>The loss doesn't directly depend on <span class="math-inline">$w$</span>. It depends on <span class="math-inline">$\hat{y}$</span>, which depends on <span class="math-inline">$w$</span>. There's a chain: <div class="math-block">$$w \rightarrow \hat{y} \rightarrow L$$</div></p>
+
+<p>Due to this chain, we can't compute <span class="math-inline">$\frac{dL}{dw}$</span> directly. We need to traverse backwards, in chain, to the point where we can calculate <span class="math-inline">$\frac{dL}{dw}$</span>.</p>
+
+<p>The chain rule says that we need to multiply derivatives along the chain.</p>
+
+<div class="math-block">$$\frac{dL}{dw} = \frac{dL}{d\hat{y}} \cdot \frac{d\hat{y}}{dw}$$</div>
+
+<p>In English, this reads as the following. To compute how much the weights influence the loss, we need to take the derivative of the loss w.r.t predicted output (<span class="math-inline">$\hat{y}$</span>), and chain it with the derivative of the predicted output (<span class="math-inline">$\hat{y}$</span>) w.r.t to the weight (<span class="math-inline">$w$</span>).</p>
+
+<p>Therefore,</p>
+
+<div class="math-block">$$\frac{dL}{dw} = -0.8 (computed\ above) \cdot \frac{d(wx+b)}{dw} = -0.8 \cdot x$$</div>
+
+<div class="math-block">$$\frac{dL}{dw} = -0.8 \cdot 2.0  = -1.6$$</div>
+
+<p>The gradient we got here represents the sensitivity of weights towards the total loss when nudged by a tiny amount. The direction towards which it's sensitive is <span class="math-inline">$negative$</span> and the magnitude by which it's sensitive is <span class="math-inline">$1.6$</span> (which is significant). Simply put, the gradient tells you the <strong>direction of increase</strong> of the loss. If <span class="math-inline">$\frac{dL}{dw} = -1.6$</span>, that means increasing <span class="math-inline">$w$</span> decreases loss. We want to <strong>minimize</strong> the loss, so we go in the <strong>opposite direction</strong> of the gradient. To the update the weight such that we minimize loss, we use:</p>
+
+<div class="math-block">$$ w\_{new} = w - learning_rate(\alpha) \cdot gradient $$</div>
+
+<p>This is a self-correcting formula. Let's understand it with some example values before we move on.</p>
+
+<h5>Negative Gradient (<span class="math-inline">$-1.6$</span>)</h5>
+
+<ul>
+<li>Means increasing <span class="math-inline">$w$</span> decreases loss</li>
+<li><span class="math-inline">$w - lr \cdot (-1.6) = w + something \rightarrow w $</span> increases</li>
+</ul>
+
+<h5>Positive Gradient (say <span class="math-inline">$+2.0$</span>)</h5>
+
+<ul>
+<li>Means: increasing <span class="math-inline">$w$</span> increases loss (bad direction)</li>
+<li><span class="math-inline">$ w - lr \cdot (2.0) = w - something \rightarrow w$</span> decreases</li>
+</ul>
+
+<p>Now let's use this formula for our weights.</p>
+
+<div class="math-block">$$ w\_{new} = 0.5 - 0.1 \cdot (-1.6) = 0.66 $$</div>
+
+<p>But remember, weights aren't the only parameters that needs this update. We need to do the same thing with our <span class="math-inline">$bias$</span>.</p>
+
+<div class="math-block">$$ \frac{dL}{db} = \frac{dL}{d\hat{y}} \cdot \frac{d(wx + b)}{db} = -0.8 \cdot (0 + 1) = -0.8 $$</div>
+
+<p>To update the bias given the gradient <span class="math-inline">$-0.8$</span></p>
+
+<div class="math-block">$$ b\_{new} = b - \alpha \cdot gradient $$</div>
+
+<div class="math-block">$$ b\_{new} = 0.1 - 0.1 \cdot (-0.8) = 0.1 + 0.08 = 0.18$$</div>
+
+<p>Now that we've got out new <span class="math-inline">$weight$</span> and <span class="math-inline">$bias$</span>, let's run the forward prediction pass on our neuron to see how close we're to the correct answer.</p>
+
+<div class="math-block">$$w_{new} = 0.66, x = 2.0, b_{new} = 0.18, y (correct) = 1.5 $$</div>
+
+<div class="math-block">$$ \hat{y} = w*{new} \cdot x + b*{new} $$</div>
+
+<div class="math-block">$$ \hat{y} = 0.66 \cdot 2.0 + 0.18 = 1.5 $$</div>
+
+<div class="math-block">$$ \hat{y} = y $$</div>
+
+<p>Wait, that's exactly 1.5! With one neuron and one input, it converged in a single step. That's too easy, but real networks need <em>many</em> iterations. This whole process of forward pass, loss computation, backward pass, and parameter update is repeated until the loss converges to a minimum. This is what's called the <strong>training loop</strong>.</p>
+
+<div class="math-block">$$\text{For each iteration:}$$</div>
+
+<div class="math-block">$$\text{1. Forward Pass: } \hat{y} = wx + b$$</div>
+
+<div class="math-block">$$\text{2. Compute Loss: } L = (\hat{y} - y)^{2}$$</div>
+
+<div class="math-block">$$\text{3. Compute Gradients: } \frac{dL}{dw} = \frac{dL}{d\hat{y}} \cdot \frac{d\hat{y}}{dw}, \quad \frac{dL}{db} = \frac{dL}{d\hat{y}} \cdot \frac{d\hat{y}}{db}$$</div>
+
+<div class="math-block">$$\text{4. Update Parameters: } w_{new} = w - \alpha \cdot \frac{dL}{dw}, \quad b_{new} = b - \alpha \cdot \frac{dL}{db}$$</div>
+
+<div class="math-block">$$\text{5. Repeat until } L \approx 0$$</div>
+
+<p>A single neuron with a single input has only 2 parameters to adjust. A real network classifying something like handwritten digits might have 100,000+ parameters and 60,000 training examples where each of them is pulling the parameters in slightly different directions. That's why the training loop runs for thousands of iterations. This is where <strong>layers</strong> and <strong>matrix multiplication</strong> come in. We are going to explore all this next!</p>
+
+<h2>Appendix: Key Definitions</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Term</th>
+  <th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Weight</strong></td>
+  <td>A factor that represents an influence over some input feature.</td>
+</tr>
+<tr>
+  <td><strong>Bias</strong></td>
+  <td>A learnable shift that allows the neuron to activate even when inputs are zero.</td>
+</tr>
+<tr>
+  <td><strong>Derivative</strong></td>
+  <td>How much one thing changes when you nudge another thing by a tiny amount.</td>
+</tr>
+<tr>
+  <td><strong>Backpropagation</strong></td>
+  <td>An algorithm that traverses the entire network backwards, calculating how much every single parameter is contributing to the total loss and what can be changed to minimize it.</td>
+</tr>
+<tr>
+  <td><strong>Loss Function</strong></td>
+  <td>Measures how far the network's predictions are from the correct answers. Lower loss means better predictions.</td>
+</tr>
+<tr>
+  <td><strong>Learning Rate</strong></td>
+  <td>A small number that controls how big of a step we take when updating weights.</td>
+</tr>
+<tr>
+  <td><strong>Forward Pass</strong></td>
+  <td>Data flowing through the network from input to output.</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+</body>
+</html>
