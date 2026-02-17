@@ -105,9 +105,9 @@ $$ \frac{dL}{db} = \frac{dL}{d\hat{y}} \cdot \frac{d(wx + b)}{db} = -0.8 \cdot (
 
 To update the bias given the gradient $-0.8$
 
-$$ b\_{new} = b - \alpha \cdot gradient $$
+$$b_{new} = b - \alpha \cdot gradient $$
 
-$$ b\_{new} = 0.1 - 0.1 \cdot (-0.8) = 0.1 + 0.08 = 0.18$$
+$$b_{new} = 0.1 - 0.1 \cdot (-0.8) = 0.1 + 0.08 = 0.18$$
 
 Now that we've got our new $weight$ and $bias$, let's run the forward prediction pass on our neuron to see how close we're to the correct answer.
 
