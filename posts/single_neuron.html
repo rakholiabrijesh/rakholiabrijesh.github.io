@@ -222,7 +222,7 @@
 
 <p>The gradient we got here represents the sensitivity of weights towards the total loss when nudged by a tiny amount. The direction towards which it's sensitive is <span class="math-inline">$negative$</span> and the magnitude by which it's sensitive is <span class="math-inline">$1.6$</span> (which is significant). Simply put, the gradient tells you the <strong>direction of increase</strong> of the loss. If <span class="math-inline">$\frac{dL}{dw} = -1.6$</span>, that means increasing <span class="math-inline">$w$</span> decreases loss. We want to <strong>minimize</strong> the loss, so we go in the <strong>opposite direction</strong> of the gradient. To the update the weight such that we minimize loss, we use:</p>
 
-<div class="math-block">$$ w\_{new} = w - learning_rate(\alpha) \cdot gradient $$</div>
+<div class="math-block">$$w_{new} = w - learning\_rate(\alpha) \cdot gradient $$</div>
 
 <p>This is a self-correcting formula. Let's understand it with some example values before we move on.</p>
 
@@ -230,19 +230,19 @@
 
 <ul>
 <li>Means increasing <span class="math-inline">$w$</span> decreases loss</li>
-<li><span class="math-inline">$w - lr \cdot (-1.6) = w + something \rightarrow w $</span> increases</li>
+<li><span class="math-inline">$w - \alpha \cdot (-1.6) = w + something \rightarrow w $</span> increases</li>
 </ul>
 
 <h5>Positive Gradient (say <span class="math-inline">$+2.0$</span>)</h5>
 
 <ul>
 <li>Means: increasing <span class="math-inline">$w$</span> increases loss (bad direction)</li>
-<li><span class="math-inline">$ w - lr \cdot (2.0) = w - something \rightarrow w$</span> decreases</li>
+<li><span class="math-inline">$ w - \alpha \cdot (2.0) = w - something \rightarrow w$</span> decreases</li>
 </ul>
 
 <p>Now let's use this formula for our weights.</p>
 
-<div class="math-block">$$ w\_{new} = 0.5 - 0.1 \cdot (-1.6) = 0.66 $$</div>
+<div class="math-block">$$w_{new} = 0.5 - 0.1 \cdot (-1.6) = 0.66 $$</div>
 
 <p>But remember, weights aren't the only parameters that needs this update. We need to do the same thing with our <span class="math-inline">$bias$</span>.</p>
 
@@ -254,7 +254,7 @@
 
 <div class="math-block">$$ b\_{new} = 0.1 - 0.1 \cdot (-0.8) = 0.1 + 0.08 = 0.18$$</div>
 
-<p>Now that we've got out new <span class="math-inline">$weight$</span> and <span class="math-inline">$bias$</span>, let's run the forward prediction pass on our neuron to see how close we're to the correct answer.</p>
+<p>Now that we've got our new <span class="math-inline">$weight$</span> and <span class="math-inline">$bias$</span>, let's run the forward prediction pass on our neuron to see how close we're to the correct answer.</p>
 
 <div class="math-block">$$w_{new} = 0.66, x = 2.0, b_{new} = 0.18, y (correct) = 1.5 $$</div>
 

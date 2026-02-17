@@ -81,23 +81,23 @@ $$\frac{dL}{dw} = -0.8 \cdot 2.0  = -1.6$$
 
 The gradient we got here represents the sensitivity of weights towards the total loss when nudged by a tiny amount. The direction towards which it's sensitive is $negative$ and the magnitude by which it's sensitive is $1.6$ (which is significant). Simply put, the gradient tells you the **direction of increase** of the loss. If $\frac{dL}{dw} = -1.6$, that means increasing $w$ decreases loss. We want to **minimize** the loss, so we go in the **opposite direction** of the gradient. To the update the weight such that we minimize loss, we use:
 
-$$ w\_{new} = w - learning_rate(\alpha) \cdot gradient $$
+$$w_{new} = w - learning\_rate(\alpha) \cdot gradient $$
 
 This is a self-correcting formula. Let's understand it with some example values before we move on.
 
 ##### Negative Gradient ($-1.6$)
 
 - Means increasing $w$ decreases loss
-- $w - lr \cdot (-1.6) = w + something \rightarrow w $ increases
+- $w - \alpha \cdot (-1.6) = w + something \rightarrow w $ increases
 
 ##### Positive Gradient (say $+2.0$)
 
 - Means: increasing $w$ increases loss (bad direction)
-- $ w - lr \cdot (2.0) = w - something \rightarrow w$ decreases
+- $ w - \alpha \cdot (2.0) = w - something \rightarrow w$ decreases
 
 Now let's use this formula for our weights.
 
-$$ w\_{new} = 0.5 - 0.1 \cdot (-1.6) = 0.66 $$
+$$w_{new} = 0.5 - 0.1 \cdot (-1.6) = 0.66 $$
 
 But remember, weights aren't the only parameters that needs this update. We need to do the same thing with our $bias$.
 
@@ -109,7 +109,7 @@ $$ b\_{new} = b - \alpha \cdot gradient $$
 
 $$ b\_{new} = 0.1 - 0.1 \cdot (-0.8) = 0.1 + 0.08 = 0.18$$
 
-Now that we've got out new $weight$ and $bias$, let's run the forward prediction pass on our neuron to see how close we're to the correct answer.
+Now that we've got our new $weight$ and $bias$, let's run the forward prediction pass on our neuron to see how close we're to the correct answer.
 
 $$w_{new} = 0.66, x = 2.0, b_{new} = 0.18, y (correct) = 1.5 $$
 
