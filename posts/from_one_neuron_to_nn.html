@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>From One Neuron to a Neural Network</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']]
+            }
+        };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.8;
+            color: #1a1a1a;
+            background: #fafafa;
+        }
+        .back {
+            display: inline-block;
+            margin-bottom: 40px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .back:hover { color: #1a1a1a; }
+        .post-header {
+            margin-bottom: 48px;
+        }
+        .post-content img {
+            display: block;
+            margin: 24px auto;
+            max-width: 100%;
+        }
+        .note { 
+            background: #f0f7ff; 
+            border-left: 4px solid #4a9eff; 
+            padding: 16px 20px; 
+            border-radius: 0 8px 8px 0; 
+            margin: 24px 0; 
+            font-family: Verdana, Geneva, sans-serif; 
+            font-size: 14px; }
+        .post-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            color: #111;
+        }
+        .post-date {
+            color: #888;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+        .post-content h2 {
+            font-size: 24px;
+            margin-top: 48px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .post-content h3 {
+            font-size: 20px;
+            margin-top: 36px;
+            margin-bottom: 12px;
+        }
+        .post-content h4 {
+            font-size: 17px;
+            margin-top: 28px;
+            margin-bottom: 10px;
+        }
+        .post-content h5 {
+            font-size: 15px;
+            margin-top: 24px;
+            margin-bottom: 8px;
+        }
+        .post-content p {
+            margin-bottom: 16px;
+        }
+        .post-content code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 90%;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+        .post-content pre {
+            background: #1a1a1a;
+            color: #e6e6e6;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .post-content pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        .post-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .post-content th, .post-content td {
+            border: 1px solid #e1e4e8;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .post-content th {
+            background: #f6f8fa;
+            font-weight: 600;
+        }
+        .post-content strong { color: #111; }
+        .post-content blockquote {
+            border-left: 3px solid #ddd;
+            padding: 0 16px;
+            color: #666;
+            margin: 20px 0;
+        }
+        .post-content ul, .post-content ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        .post-content li {
+            margin-bottom: 6px;
+        }
+        .math-block {
+            margin: 8px 0;
+            overflow-x: auto;
+        }
+        .math-block + .math-block {
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back">← back</a>
+    <div class="post-header">
+        <h1>From One Neuron to a Neural Network</h1>
+        <div class="post-date">February 18, 2025</div>
+    </div>
+    <div class="post-content">
+        <h1>From One Neuron to a Neural Network</h1>
+
+<p>In the previous post, our neuron had one input: <span class="math-inline">$y = wx + b$</span>. But a real neuron in a network receives many inputs. Think about MNIST - each image is 784 pixels. One neuron needs to take all 784 values and produce one output.</p>
+
+<div class="math-block">$$\hat{y} = (w_1 \cdot x_1 + w_2 \cdot x_2 + w_3 \cdot x_3 + ... + w_{784} \cdot x_{784}) + b$$</div>
+
+<div class="math-block">$$\hat{y} = \sum_{i=1}^{784} w_i \cdot x_i + b$$</div>
+
+<p>In Python (using NumPy), this can be represented as:</p>
+
+<div class="codehilite">
+<pre><span></span><code><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+<span class="c1"># or</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">w</span> <span class="o">@</span> <span class="n">x</span> <span class="o">+</span> <span class="n">b</span>
+</code></pre>
+</div>
+
+<p>Yes, that's 784 multiplications and additions in one operation. That's the power of NumPy.</p>
+
+<p>But wait, what does this computation of a neuron actually represent? Let's think about this concretely.
+A neuron takes 784 pixel values, multiplies each by a weight and sums them up. Some weights are big, some are small, some might be negative.</p>
+
+<p>If a weight for pixel #200 is large and positive, what does that mean? The neuron <strong>cares a lot</strong> about that pixel being bright.
+If a weight for pixel #500 is large and negative? The neuron wants that pixel to be <strong>dark</strong>.
+If a weight is near zero? The neuron <strong>doesn't care</strong> about that pixel.</p>
+
+<p>So essentially, the output of a neuron really represents the following: <strong>how much does this input match the pattern this neuron is looking for?</strong></p>
+
+<p>A neuron is a <em>pattern detector</em>. Its weights define what pattern it's sensitive to. Given all this, one neuron detects one pattern. To classify 10 different digits, you need mulitple neurons, each looking for a different pattern. That's why we need something called a <strong>layer</strong> of neurons.</p>
+
+<h2>Multiple Neurons</h2>
+
+<p>A single neuron has 784 weights and produces 1 output. If we want 10 neurons (one per digit), each has its own 784 weights.</p>
+
+<pre><code>Neuron 0: 784 weights -&gt; 1 output
+Neuron 1: 784 weights -&gt; 1 output
+...
+Neuron 9: 784 weights -&gt; 1 output
+</code></pre>
+
+<p>Instead of running 10 separate dot products, how can we organize all these weights so that we can compute 10 outputs at once?</p>
+
+<p>We can stack all the weights into a single <strong>matrix</strong> and compute all 10 outputs at once. Here's how:</p>
+
+<div class="math-block">$$\begin{bmatrix} y_0 & y_1 & \cdots & y_9 \end{bmatrix} = \begin{bmatrix} x_0 & x_1 & \cdots & x_{783} \end{bmatrix} \cdot \begin{bmatrix} w_{0,0} & w_{0,1} & \cdots & w_{0,9} \\ w_{1,0} & w_{1,1} & \cdots & w_{1,9} \\ \vdots & \vdots & \ddots & \vdots \\ w_{783,0} & w_{783,1} & \cdots & w_{783,9} \end{bmatrix} + \begin{bmatrix} b_0 & b_1 & \cdots & b_9 \end{bmatrix}$$</div>
+
+<p>In NumPy, this entire operation is just:</p>
+
+<div class="codehilite">
+<pre><span></span><code><span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">@</span> <span class="n">W</span> <span class="o">+</span> <span class="n">b</span>
+<span class="c1"># (784,) @ (784, 10) + (10,) → (10,)</span>
+<span class="c1"># 784 inputs, 784 weights, 10 neurons and 10 outputs.</span>
+</code></pre>
+</div>
+
+<p>10 neurons, 784 weights each, all computed in one line.</p>
+
+<p><img src="images/arch_1.png" alt="Network so far" /></p>
+
+<div class="note">
+<strong>📝 NumPy Shapes</strong><br>
+<p style="italic">Every array in NumPy has a shape. A shape of <code>(3,)</code> means 3 numbers in a row. A shape of <code>(2, 3)</code> means 2 rows and 3 columns. When you multiply arrays with <code>@</code>, the inner dimensions must match and they disappear — the outer dimensions survive. So <code>(2, 3) @ (3, 4)</code> gives <code>(2, 4)</code> because the 3s match and vanish. If the inner dimensions don't match, NumPy throws an error. This one rule governs every matrix operation in a neural network. </p>
+</div>
+
+<p>Now that we have something that allows us to spin up 10 neurons that gives us 10 outputs, is that enough to classify digits? We'll call this a <strong>layer</strong>. This one layer does <code>x @ W + b</code>, and this is a linear function. It can only draw straight lines to separate things. Let's plot some 3's and 8's on a graph and see if a straight line can separate them.</p>
+
+<p><img src="images/linear_separation.png" alt="Can a straight line separate &quot;3s&quot; from 8s&quot;?" /></p>
+
+<p>The graph above shows 500 handwritten digits plotted as points in 2D space. Blue dots are 3s, red dots are 8s. Try drawing a single straight line that puts all the blue on one side and all the red on the other. It's impossible. They're mixed together.</p>
+
+<p>A single linear layer can only draw straight boundaries, which means it will never perfectly separate these digits. You might think, what if we just stack more layers?</p>
+
+<p>Let's try two layers:</p>
+
+<div class="math-block">$$\text{Layer 1: } z = W_1 \cdot x + b_1$$</div>
+
+<div class="math-block">$$\text{Layer 2: } y = W_2 \cdot z + b_2$$</div>
+
+<p>Substituting layer 1 into layer 2:</p>
+
+<div class="math-block">$$y = W_2 \cdot (W_1 \cdot x + b_1) + b_2$$</div>
+
+<div class="math-block">$$y = (W_2 \cdot W_1) \cdot x + (W_2 \cdot b_1 + b_2)$$</div>
+
+<div class="math-block">$$y = W_{combined} \cdot x + b_{combined}$$</div>
+
+<p>It collapsed back into a single linear function. No matter how many linear layers you stack, the result is always just one straight line. Depth is useless without something to break the linearity.</p>
+
+<p>We need something between the layers that <strong>bends</strong> the output. Something that makes a straight line into a curve. This is called an <strong>activation function</strong>, and the simplest one is called <strong>ReLU</strong>.</p>
+
+<h2>What is an activation function?</h2>
+
+<p>An activation function sits between layers. It takes the output from the previous linear layer, transforms it in a non-linear way, and passes the result to the next layer. As we saw above, this transformation from linear to non-linear is necessary, otherwise the layers will collapse. The activation function prevents that collapse.</p>
+
+<p>One such example of an activation function that's commonly used is called <strong>ReLU</strong>. It's a pretty convenient function. All it does is it if the value is positive, it <em>keeps</em> it, and if the value is negative, it returns <em>zero</em>.</p>
+
+<div class="math-block">$$ ReLU(x) = max(0, x) $$</div>
+
+<p><img src="images/relu.png" alt="ReLU" /></p>
+
+<p>Let's add ReLU to our ongoing network!</p>
+
+<p><img src="images/arch_2.png" alt="add activation function" /></p>
+
+    </div>
+</body>
+</html>
