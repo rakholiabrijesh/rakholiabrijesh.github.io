@@ -54,7 +54,7 @@ y = x @ W + b
 
 10 neurons, 784 weights each, all computed in one line.
 
-![Network so far](images/arch_1.png)
+![Network so far](/images/arch_1.png)
 
 <div class="note">
 <strong>📝 NumPy Shapes</strong><br>
@@ -63,7 +63,7 @@ y = x @ W + b
 
 Now that we have something that allows us to spin up 10 neurons that gives us 10 outputs, is that enough to classify digits? We'll call this a **layer**. This one layer does `x @ W + b`, and this is a linear function. It can only draw straight lines to separate things. Let's plot some 3's and 8's on a graph and see if a straight line can separate them.
 
-![Can a straight line separate "3s" from 8s"?](images/linear_separation.png)
+![Can a straight line separate "3s" from 8s"?](/images/linear_separation.png)
 
 The graph above shows 500 handwritten digits plotted as points in 2D space. Blue dots are 3s, red dots are 8s. Try drawing a single straight line that puts all the blue on one side and all the red on the other. It's impossible. They're mixed together.
 
@@ -92,8 +92,8 @@ One such example of an activation function that's commonly used is called **ReLU
 
 $$ ReLU(x) = max(0, x) $$
 
-![ReLU](images/relu.png)
+![ReLU](/images/relu.png)
 
 Let's add ReLU to our ongoing network!
 
-![add activation function](images/arch_2.png)
+![add activation function](/images/arch_2.png)
