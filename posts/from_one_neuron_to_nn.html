@@ -255,6 +255,149 @@ Neuron 9: 784 weights -&gt; 1 output
 
 <p><img src="/images/arch_2.png" alt="add activation function" /></p>
 
+<h2>Stacking Layers</h2>
+
+<p>At this point we'll start thinking of our network in terms of <strong>layers</strong>. Our network currently takes 784 inputs, passes them through a linear layer with 10 neurons (one per digit), and each output goes through ReLU. The hope is that each neuron has learned to detect a specific digit.</p>
+
+<p>But is that realistic? Can a single neuron really learn to recognize every possible way someone writes a "3"?</p>
+
+<p>One neuron per digit means each must detect the entire pattern by itself. What if instead we had 128 neurons detecting parts such as curves, edges and loops. Then add another layer which combines parts into digits.</p>
+
+<p>Think about how you recognize an "8". You don't memorize every possible pixel arrangement. You see two loops stacked on top of each other. Your brain detects <strong>parts</strong> first, then combines them.</p>
+
+<p>That's exactly what stacking layers does:</p>
+
+<ul>
+<li><strong>Layer 1</strong> (784 → 128): 128 neurons each learn to detect simple patterns such as edges, curves, strokes, loops.</li>
+<li><strong>Layer 2</strong> (128 → 64): 64 neurons combine those simple patterns into higher-level features like loops, corners, intersections.</li>
+<li><strong>Layer 3</strong> (64 → 10): 10 neurons combine those features into final digit classifications</li>
+</ul>
+
+<p>Each layer compresses the information further, from raw pixels to parts to patterns to answers.</p>
+
+<p><img src="/images/arch_full.png" alt="Full architecture" /></p>
+
+<p>There's no formula for choosing the right number of neurons. The output layer is fixed by your problem: 10 classes means 10 neurons. For hidden layers, start with something reasonable and experiment. Too few neurons and the network can't learn enough patterns. Too many and it might <strong>memorize</strong> the training data instead of learning general patterns (this is called <strong>overfitting</strong> — like a student who memorizes exam answers but can't solve new problems). A common starting point is to shrink gradually from input to output, giving early layers more neurons to capture many simple patterns and later layers fewer neurons to combine them. Numbers like 128 and 64 are popular partly because powers of 2 run slightly faster on hardware, but there's nothing magical about them. The real answer is: try something, train it, see if it works, adjust, repeat. Choosing layer sizes is more art than science.</p>
+
+<h2>Backpropagation through Layers</h2>
+
+<p>We have the architecture. Now, how does it learn?</p>
+
+<p>We already understand the core idea from our previous post. For a single neuron, we used the loss as a starting point and measured how much the loss changes when we wiggle <span class="math-inline">$\hat{y}$</span>. Then, using the chain rule, we figured out how to update the weights and bias to minimize the loss. This is <strong>backpropagation</strong>.</p>
+
+<p>The same idea applies here — but instead of a single neuron with single values, we now have <strong>layers</strong> with <strong>matrices</strong> of weights and activation functions in between. Let's walk through it step by step.</p>
+
+<ul>
+<li>Start from the loss, work backward</li>
+<li>Trace the gradient backward through the last linear layer</li>
+<li>Each layer receives a gradient, and computes three things:
+<ol>
+<li>Gradient for its weights (to update them)</li>
+<li>Gradient for its bias (to update it)</li>
+<li>Graident to pass backward(to keep the chain going)</li>
+</ol></li>
+<li>ReLU just passes gradient through where input was positive, blocks where negative.</li>
+</ul>
+
+<h4>How does a gradient flow through a Linear layer?</h4>
+
+<p>Let's start by comparing what we already know with what we need to learn.</p>
+
+<p>For our single neuron, the forward pass was:</p>
+
+<div class="math-block">$$\hat{y} = w \cdot x + b$$</div>
+
+<p>And we computed the gradients using the chain rule:</p>
+
+<div class="math-block">$$\frac{dL}{dw} = \frac{dL}{d\hat{y}} \cdot x \quad \quad \frac{dL}{db} = \frac{dL}{d\hat{y}} \cdot 1$$</div>
+
+<p>For a layer of neurons, the forward pass looks almost identical but just with matrices:</p>
+
+<div class="math-block">$$Y = X \cdot W + b$$</div>
+
+<p>And the gradients follow the exact same logic:</p>
+
+<table>
+<thead>
+<tr>
+  <th></th>
+  <th>Single Neuron</th>
+  <th>Layer of Neurons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Forward</strong></td>
+  <td><span class="math-inline">$\hat{y} = w \cdot x + b$</span></td>
+  <td><span class="math-inline">$Y = X \cdot W + b$</span></td>
+</tr>
+<tr>
+  <td><strong>Weight gradient</strong></td>
+  <td><span class="math-inline">$\frac{dL}{dw} = \frac{dL}{d\hat{y}} \cdot x$</span></td>
+  <td><span class="math-inline">$\frac{dL}{dW} = X^T \cdot \frac{dL}{dY}$</span></td>
+</tr>
+<tr>
+  <td><strong>Bias gradient</strong></td>
+  <td><span class="math-inline">$\frac{dL}{db} = \frac{dL}{d\hat{y}}$</span></td>
+  <td><span class="math-inline">$\frac{dL}{db} = \sum \frac{dL}{dY}$</span></td>
+</tr>
+<tr>
+  <td><strong>Pass backward</strong></td>
+  <td><span class="math-inline">$\frac{dL}{dx} = \frac{dL}{d\hat{y}} \cdot w$</span></td>
+  <td><span class="math-inline">$\frac{dL}{dX} = \frac{dL}{dY} \cdot W^T$</span></td>
+</tr>
+</tbody>
+</table>
+
+<p>It's the same idea — just scaled up. Let's break down each one.</p>
+
+<p><strong>Weight gradient:</strong> <span class="math-inline">$\frac{dL}{dW} = X^T \cdot \frac{dL}{dY}$</span></p>
+
+<p>In the single neuron case, the weight gradient was the input multiplied by the incoming gradient. Same thing here — <span class="math-inline">$X^T$</span> is our input (transposed to make the shapes work) multiplied by the gradient flowing in from the next layer.</p>
+
+<p><strong>Bias gradient:</strong> <span class="math-inline">$\frac{dL}{db} = \sum \frac{dL}{dY}$</span></p>
+
+<p>For a single neuron, the bias gradient was just the incoming gradient (multiplied by 1). For a layer processing a batch of samples, each sample contributes its own gradient. We sum them up because there's only one bias shared across all samples.</p>
+
+<p><strong>Gradient to pass backward:</strong> <span class="math-inline">$\frac{dL}{dX} = \frac{dL}{dY} \cdot W^T$</span></p>
+
+<p>This is the gradient that gets sent to the previous layer. In the single neuron case, it was the incoming gradient multiplied by the weight. Same here, we multiply by <span class="math-inline">$W^T$</span> (transposed to make the shapes work). This is what keeps the chain going.</p>
+
+<h4>How does a gradient flow through ReLU?</h4>
+
+<p>ReLU's forward pass was simple — keep positives, zero out negatives. Its backward pass is just as simple.</p>
+
+<p>Think about it: if ReLU kept a value (it was positive), then a small change in the input causes the same small change in the output. The gradient passes through unchanged.</p>
+
+<p>If ReLU zeroed a value (it was negative), then the output is stuck at zero no matter what. The gradient is blocked and it becomes zero.</p>
+
+<div class="math-block">$$\frac{dL}{dX} = \frac{dL}{dY} \cdot \begin{cases} 1 & \text{if input was positive} \\ 0 & \text{if input was negative} \end{cases}$$</div>
+
+<p>ReLU acts like a gate. It lets the gradient through where the neuron was active, and blocks it where the neuron was dead.</p>
+
+<h4>Putting it all together</h4>
+
+<p>Let's trace the full backward pass through our network:</p>
+
+<div class="math-block">$$\text{Input} \rightarrow \text{Linear}_1 \rightarrow \text{ReLU} \rightarrow \text{Linear}_2 \rightarrow \text{ReLU} \rightarrow \text{Linear}_3 \rightarrow \text{Loss}$$</div>
+
+<p>Starting from the loss, the gradient flows backward:</p>
+
+<ol>
+<li><strong>Loss</strong> computes <span class="math-inline">$\frac{dL}{dY_3}$</span> — how much the loss changes with respect to the final output. This is our first gradient.</li>
+<li><strong>Linear₃</strong> receives this gradient and computes:
+<ul>
+<li>Its weight and bias gradients (to update its parameters)</li>
+<li><span class="math-inline">$\frac{dL}{dX_3}$</span> to pass backward</li>
+</ul></li>
+<li><strong>ReLU</strong> receives <span class="math-inline">$\frac{dL}{dX_3}$</span> and lets it through where neurons were active, blocks where they were dead</li>
+<li><strong>Linear₂</strong> receives the surviving gradient, computes its own weight and bias gradients, and passes another gradient backward</li>
+<li><strong>ReLU</strong> gates the gradient again</li>
+<li><strong>Linear₁</strong> receives the gradient and computes its weight and bias gradients</li>
+</ol>
+
+<p>At the end of this process, every layer has its own weight and bias gradients which is the exact information needed to update the parameters and reduce the loss.</p>
+
     </div>
 </body>
 </html>
